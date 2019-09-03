@@ -3,19 +3,66 @@
 let turn = "X";
 // Is game ended?
 let ended = false;
+// Set how big gamefield should be at the beginning.
+let initial_size = 6;
 // Tics and toes in simple two dimensional array
-let tics_and_toes = new Array(5);
+let tics_and_toes = new Array(6);
 
 function init() {
   // Generate two dimensional array by putting lists inside lists
-  for (let x = 0; x < 5; x++) {
-    tics_and_toes[x] = new Array(5);
-    for (let y = 0; y < 5; y++) {
-      tics_and_toes[x][y] = " ";
-    }
+  for (let x = 0; x < 6; x++) {
+    tics_and_toes[x] = new Array(6);
+    initialize_array(tics_and_toes[x], "");
   }
   // Render initial table
   render_table(tics_and_toes);
+}
+
+function update_table(tics_and_toes, x_start, y_start) {
+  // If the last tick or toe came closer than three spaces to edge
+  // Generate more space to that side
+  let x_size = tics_and_toes.length;
+  let y_size = tics_and_toes[0].length;
+  let limit = 3;
+  let more = 0;
+  if (x_start < limit) {
+    more = limit - x_start
+    for (let x = 0; x < more; x++) {
+      tics_and_toes.unshift(new Array(y_size));
+      initialize_array(tics_and_toes[0], "");
+    }
+  }
+  if (x_size - x_start <= limit) {
+    more = limit - (x_size - x_start) + 1
+    for (let x = 0; x < more; x++) {
+      tics_and_toes.push(new Array(y_size));
+      initialize_array(tics_and_toes[x_size + x], "");
+    }
+  }
+  // In case there is new marking in the corner
+  x_size = tics_and_toes.length;
+  if (y_start < limit) {
+    more = limit - y_start
+    for (let x = 0; x < x_size; x++) {
+      for (let y = 0; y < more; y++) {
+        tics_and_toes[x].unshift("");
+      }
+    }
+  }
+  if (y_size - y_start <= limit) {
+    more = limit - (y_size - y_start) + 1
+    for (let x = 0; x < x_size; x++) {
+      for (let y = 0; y < more; y++) {
+        tics_and_toes[x].push("");
+      }
+    }
+  }
+}
+
+function initialize_array(array, mark){
+  for (let index = 0; index < array.length; index++) {
+    array[index] = mark;
+  }
 }
 
 function render_table(tics_and_toes) {
@@ -24,10 +71,10 @@ function render_table(tics_and_toes) {
   board.innerHTML = "";
   let x_size = tics_and_toes.length;
   let y_size = tics_and_toes[0].length;
-  for (let y = 0; y < 5; y++) {
+  for (let y = 0; y < y_size; y++) {
     // Create rows
     let row = document.createElement("tr");
-    for (let x = 0; x < 5; x++) {
+    for (let x = 0; x < x_size; x++) {
       // Create columns for rows
       let column = document.createElement("td");
       // Add id for click element usage
@@ -36,8 +83,8 @@ function render_table(tics_and_toes) {
       // Add click handeler
       column.addEventListener("click", click_event);
       // Force column to stay constant
-      column.width = 100 / x_size + "%";
-      column.height = 100 / y_size + "%";
+      column.style.width = "30px";
+      column.style.height = "30px";
       // Write tic or toe based on the two dimensional array
       column.innerHTML = tics_and_toes[x][y];
       // Add column to row
@@ -46,6 +93,9 @@ function render_table(tics_and_toes) {
     // Add row to table
     board.appendChild(row);
   }
+  // Update board sizes
+  board.style.width = x_size * 30 + "px";
+  board.style.height = y_size * 30 + "px";
 }
 
 function click_event() {
@@ -56,11 +106,13 @@ function click_event() {
   // Get cell coordinates from the dataset
   let x = this.dataset.coord_x;
   let y = this.dataset.coord_y;
-  if (tics_and_toes[x][y] === " ") {
+  if (tics_and_toes[x][y] === "") {
     // Update cell if there is no marking allredy
     tics_and_toes[x][y] = turn;
     update_player_status();
   }
+  // Update table incase there is need for new space
+  update_table(tics_and_toes, x, y);
   // Render new table
   render_table(tics_and_toes);
   // Check wather either player won the game
@@ -88,7 +140,7 @@ function check_status(tics_and_toes) {
   // Go column by column line by line
   for (let x = 0; x < x_size; x++) {
     for (let y = 0; y < y_size; y++) {
-      if (tics_and_toes[x][y] === " ") {
+      if (tics_and_toes[x][y] === "") {
         continue;
       }
       // Chek right direction
@@ -104,13 +156,14 @@ function check_status(tics_and_toes) {
         check_lines(tics_and_toes, x, y, 1, 1, count);
       }
       // Check right up
-      if (x <= x_size - count && y >= y_size - 1) {
+      if (x <= x_size - count && y >= y_size - count) {
         check_lines(tics_and_toes, x, y, 1, -1, count);
       }
     }
   }
 }
-
+					
+	
 function check_lines(
   tics_and_toes,
   start_x,
