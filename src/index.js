@@ -1,21 +1,44 @@
-// Define global variables
-// Keep count whos turn it is
-let turn = "X";
+// Constants
+// Define how many markins in the row are needed
+const needed_count = 5;
+// Define how many free spaces there should be
+const free_at_least = 3;
+// Checking table defined by x and y slope pairs
+const check_table = [[1, 0], [0, 1], [1, 1], [1, -1]]
+// Should the board be expanding or not
+const expanding = false;
+// How much there is time per player
+const time_limit = 10;
+
+// Global variables
 // Is game ended?
 let ended = false;
 // Set how big gamefield should be at the beginning.
-let initial_size = 6;
+let initial_size = 5;
 // Tics and toes in simple two dimensional array
-let tics_and_toes = new Array(6);
+let tics_and_toes = new Array(initial_size);
+// Set player default marks
+let player_1_mark = "x";
+let player_2_mark = "o";
+// Keep count whos turn it is
+let turn = player_1_mark;
+// How much time is left per turn
+let time = time_limit;
+// Timer object for stop handle
+let timer_handle;
 
 function init() {
   // Generate two dimensional array by putting lists inside lists
-  for (let x = 0; x < 6; x++) {
-    tics_and_toes[x] = new Array(6);
+  for (let x = 0; x < initial_size; x++) {
+    tics_and_toes[x] = new Array(initial_size);
     initialize_array(tics_and_toes[x], "");
   }
   // Render initial table
   render_table(tics_and_toes);
+  // Set initial visual timer value
+  update_bar();
+  // Start timer
+  timer_handle = setInterval(update_timer, 1000);
 }
 
 function update_table(tics_and_toes, x_start, y_start) {
@@ -23,19 +46,18 @@ function update_table(tics_and_toes, x_start, y_start) {
   // Generate more space to that side
   let x_size = tics_and_toes.length;
   let y_size = tics_and_toes[0].length;
-  let limit = 3;
   let more = 0;
   // Generate space left
-  if (x_start < limit) {
-    more = limit - x_start
+  if (x_start < free_at_least) {
+    more = free_at_least - x_start
     for (let x = 0; x < more; x++) {
       tics_and_toes.unshift(new Array(y_size));
       initialize_array(tics_and_toes[0], "");
     }
   }
   // Generate space right
-  if (x_size - x_start <= limit) {
-    more = limit - (x_size - x_start) + 1
+  if (x_size - x_start <= free_at_least) {
+    more = free_at_least - (x_size - x_start) + 1
     for (let x = 0; x < more; x++) {
       tics_and_toes.push(new Array(y_size));
       initialize_array(tics_and_toes[x_size + x], "");
@@ -44,8 +66,8 @@ function update_table(tics_and_toes, x_start, y_start) {
   // In case should be expanded to two directions
   x_size = tics_and_toes.length;
   // Generate space up
-  if (y_start < limit) {
-    more = limit - y_start
+  if (y_start < free_at_least) {
+    more = free_at_least - y_start
     for (let x = 0; x < x_size; x++) {
       for (let y = 0; y < more; y++) {
         tics_and_toes[x].unshift("");
@@ -53,8 +75,8 @@ function update_table(tics_and_toes, x_start, y_start) {
     }
   }
   // Generate space down
-  if (y_size - y_start <= limit) {
-    more = limit - (y_size - y_start) + 1
+  if (y_size - y_start <= free_at_least) {
+    more = free_at_least - (y_size - y_start) + 1
     for (let x = 0; x < x_size; x++) {
       for (let y = 0; y < more; y++) {
         tics_and_toes[x].push("");
@@ -63,7 +85,7 @@ function update_table(tics_and_toes, x_start, y_start) {
   }
 }
 
-function initialize_array(array, mark){
+function initialize_array(array, mark) {
   for (let index = 0; index < array.length; index++) {
     array[index] = mark;
   }
@@ -82,13 +104,12 @@ function render_table(tics_and_toes) {
     for (let x = 0; x < x_size; x++) {
       // Create columns for rows
       let column = document.createElement("td");
-      // Add id for click element usage
-      column.dataset.coord_x = x;
-      column.dataset.coord_y = y;
       // Add click handeler
       column.addEventListener("click", click_event);
       // Write tic or toe based on the two dimensional array
       column.innerHTML = tics_and_toes[x][y];
+      // Add style based on player
+      column.className = tics_and_toes[x][y];
       // Add column to row
       row.appendChild(column);
     }
@@ -104,13 +125,13 @@ function click_event() {
   if (ended === true) {
     return;
   }
-  // Get cell coordinates from the dataset
-  let x = Number(this.dataset.coord_x);
-  let y = Number(this.dataset.coord_y);
+  // Get cell coordinates from the object
+  let x = this.cellIndex;
+  let y = this.parentNode.rowIndex;
   if (tics_and_toes[x][y] === "") {
     // Update cell if there is no marking allredy
     tics_and_toes[x][y] = turn;
-    update_player_status();
+    change_player_turn();
   }
   // Calculate straight count
   // This gotta be done before updates otherwise
@@ -118,61 +139,50 @@ function click_event() {
   results = check_status(tics_and_toes, x, y);
   let mark = tics_and_toes[x][y];
   // Update table incase there is need for new space
-  update_table(tics_and_toes, x, y);
+  if (expanding === true) {
+    update_table(tics_and_toes, x, y);
+  }
   // Render new table
   render_table(tics_and_toes);
   // Check wether either player won the game
   check_winner(results, mark)
 }
 
-function update_player_status() {
+function change_player_turn() {
   // Update whos turn text field
   player_turn = document.getElementById("player_turn");
   // Change turns
-  if (turn === "X") {
-    turn = "O";
-    player_turn.innerHTML = "O turn";
+  if (turn === player_1_mark) {
+    turn = player_2_mark;
+    player_turn.innerHTML = player_2_mark + " turn";
   } else {
-    turn = "X";
-    player_turn.innerHTML = "X turn";
+    turn = player_1_mark;
+    player_turn.innerHTML = player_1_mark + " turn";
   }
+  // Reset turn time
+  time = time_limit;
+  // Update time visuals
+  update_bar();
+  reset_timer();
 }
 
 function check_status(tics_and_toes, x, y) {
   // Check winner from x and y position
   // Define variables
-  let count = 5;
   let first;
   let second;
   let results = new Array(4);
-  // Chek left and right
-  first = check_lines(tics_and_toes, x, y, 1, 0, count);
-  second = check_lines(tics_and_toes, x, y, -1, 0, count);
-  results[0] = first + second -1;
-  // Chek up and down
-  first = check_lines(tics_and_toes, x, y, 0, 1, count);
-  second = check_lines(tics_and_toes, x, y, 0, -1, count);
-  results[1] = first + second -1;
-  // Check left down right up
-  first = check_lines(tics_and_toes, x, y, 1, 1, count);
-  second = check_lines(tics_and_toes, x, y, -1, -1, count);
-  results[2] = first + second -1;
-  // Check left up right down
-  first = check_lines(tics_and_toes, x, y, 1, -1, count);
-  second = check_lines(tics_and_toes, x, y, -1, 1, count);
-  results[3] = first + second -1;
+  // Check left and right, up and down and diagonal directions based on check table
+  for (check = 0; check < check_table.length; check++) {
+    let first = check_lines(tics_and_toes, x, y, check_table[check][0], check_table[check][1]);
+    let second = check_lines(tics_and_toes, x, y, -check_table[check][0], -check_table[check][1]);
+    results[check] = first + second - 1;
+  }
   return results;
 }
-					
-	
-function check_lines(
-  tics_and_toes,
-  start_x,
-  start_y,
-  direction_x,
-  direction_y,
-  max_length
-) {
+
+
+function check_lines(tics_and_toes, start_x, start_y, direction_x, direction_y) {
   // Check lines using basic analytical math
   // Return line lenght
   let mark = tics_and_toes[start_x][start_y];
@@ -181,20 +191,18 @@ function check_lines(
   let x;
   let y;
   let count
-  for (count = 1; count < max_length; count++) {
+  for (count = 1; count < needed_count; count++) {
     x = start_x + direction_x * count;
     y = start_y + direction_y * count;
     // Check have we reatched edge
-    if (x < 0 || x >= x_size) {
-      break;
-    }
-    if (y < 0 || y >= y_size) {
+    if (x < 0 || x >= x_size || y < 0 || y >= y_size) {
       break;
     }
     if (tics_and_toes[x][y] !== mark) {
       // If found different mark break and return length
       break;
     }
+
   }
   return count;
 }
@@ -202,7 +210,7 @@ function check_lines(
 function check_winner(results, mark) {
   // Check do we have a winner
   if (results.includes(5)) {
-    if (mark === "X") {
+    if (mark === player_1_mark) {
       alert("Player 1 won!");
     } else {
       alert("Player 2 won!");
@@ -214,10 +222,38 @@ function check_winner(results, mark) {
     button.setAttribute("onClick", "location.reload();");
     button.type = "button";
     page.appendChild(button);
+    // Stop responding to clicks
     ended = true;
     player_turn = document.getElementById("player_turn");
     player_turn.innerHTML = ""
+    // Stop automatic timer
+    clearInterval(update_timer);
   }
+}
+
+function update_timer() {
+  // Update time bar and change turns if necessary
+  time -= 1;
+  if (time === 0) {
+    change_player_turn();
+  }
+  update_bar();
+}
+
+function reset_timer() {
+  // Reset timer for accurate time measurement
+  clearInterval(timer_handle);
+  timer_handle = setInterval(update_timer, 1000);
+}
+
+function update_bar() {
+  let timer = document.getElementById("timer");
+  let timer_text = document.getElementById("timer_text");
+  let percent = time / time_limit;
+  timer.style.width = (1 - percent) * 100 + "%";
+  // Make bar from green to red
+  timer.style.backgroundColor = "rgba(" + String(255 - percent * 255) + "," + String(percent * 255) + ",0,0.6)";
+  timer_text.innerHTML = String(time);
 }
 
 init();
