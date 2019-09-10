@@ -4,14 +4,14 @@ let turn = "X";
 // Is game ended?
 let ended = false;
 // Set how big gamefield should be at the beginning.
-let initial_size = 6;
+let initial_size = 5;
 // Tics and toes in simple two dimensional array
-let tics_and_toes = new Array(6);
+let tics_and_toes = new Array(5);
 
 function init() {
   // Generate two dimensional array by putting lists inside lists
-  for (let x = 0; x < 6; x++) {
-    tics_and_toes[x] = new Array(6);
+  for (let x = 0; x < 5; x++) {
+    tics_and_toes[x] = new Array(5);
     initialize_array(tics_and_toes[x], "");
   }
   // Render initial table
@@ -118,7 +118,7 @@ function click_event() {
   results = check_status(tics_and_toes, x, y);
   let mark = tics_and_toes[x][y];
   // Update table incase there is need for new space
-  update_table(tics_and_toes, x, y);
+  // update_table(tics_and_toes, x, y);
   // Render new table
   render_table(tics_and_toes);
   // Check wether either player won the game
