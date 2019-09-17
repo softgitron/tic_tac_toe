@@ -4,6 +4,8 @@
 <head>
 	<title>Tic Tac toe by Roni</title>
 	<link rel="stylesheet" type="text/css" href="src/index.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 	<meta charset="UTF-8" />
 </head>
 
@@ -15,18 +17,22 @@
 		</H2>
 		-->
 		<!-- Table will appear here-->
-		<div id="board">
+		<div class="container">
+			<div id="board">
+			</div>
+			<br>
+			<div id="timer_base" class="timer-base">
+				<!-- Bar will be here-->
+				<div class="progress" style="height: 35px; background-color: lightgray">
+					<div id="timer" class="determinate" style="height: 100px"></div>
+				</div>
+				<!-- Time will be here-->
+				<span id="timer_text" class="timer-bar"></span>
+			</div>
+			<H4 id="player_turn">
+				X turn
+			</H4>
 		</div>
-		<br>
-		<div id="timer_base" class="timer-base">
-			<!-- Bar will be here-->
-			<div id="timer" class="timer-bar"></div>
-			<!-- Time will be here-->
-			<div id="timer_text" class="timer-bar"></div>
-		</div>
-		<H4 id="player_turn">
-			X turn
-		</H4>
 	</div>
 	<script src="src/index.js">
 	</script>

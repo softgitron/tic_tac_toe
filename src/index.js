@@ -31,7 +31,7 @@ function init() {
   // Generate two dimensional array by putting lists inside lists
   for (let x = 0; x < initial_size; x++) {
     tics_and_toes[x] = new Array(initial_size);
-    initialize_array(tics_and_toes[x], "");
+    initialize_array(tics_and_toes[x], "?");
   }
   // Render initial table
   render_table(tics_and_toes);
@@ -52,7 +52,7 @@ function update_table(tics_and_toes, x_start, y_start) {
     more = free_at_least - x_start
     for (let x = 0; x < more; x++) {
       tics_and_toes.unshift(new Array(y_size));
-      initialize_array(tics_and_toes[0], "");
+      initialize_array(tics_and_toes[0], "?");
     }
   }
   // Generate space right
@@ -60,7 +60,7 @@ function update_table(tics_and_toes, x_start, y_start) {
     more = free_at_least - (x_size - x_start) + 1
     for (let x = 0; x < more; x++) {
       tics_and_toes.push(new Array(y_size));
-      initialize_array(tics_and_toes[x_size + x], "");
+      initialize_array(tics_and_toes[x_size + x], "?");
     }
   }
   // In case should be expanded to two directions
@@ -70,7 +70,7 @@ function update_table(tics_and_toes, x_start, y_start) {
     more = free_at_least - y_start
     for (let x = 0; x < x_size; x++) {
       for (let y = 0; y < more; y++) {
-        tics_and_toes[x].unshift("");
+        tics_and_toes[x].unshift("?");
       }
     }
   }
@@ -79,7 +79,7 @@ function update_table(tics_and_toes, x_start, y_start) {
     more = free_at_least - (y_size - y_start) + 1
     for (let x = 0; x < x_size; x++) {
       for (let y = 0; y < more; y++) {
-        tics_and_toes[x].push("");
+        tics_and_toes[x].push("?");
       }
     }
   }
@@ -95,21 +95,30 @@ function render_table(tics_and_toes) {
   let board = document.getElementById("board");
   // Clear board
   board.innerHTML = "";
-  table = document.createElement("table");
+  table = document.createElement("div");
   let x_size = tics_and_toes.length;
   let y_size = tics_and_toes[0].length;
   for (let y = 0; y < y_size; y++) {
     // Create rows
-    let row = document.createElement("tr");
+    let row = document.createElement("div");
+    row.className = "row no-margin";
     for (let x = 0; x < x_size; x++) {
       // Create columns for rows
-      let column = document.createElement("td");
+      let column = document.createElement("div");
       // Add click handeler
       column.addEventListener("click", click_event);
       // Write tic or toe based on the two dimensional array
       column.innerHTML = tics_and_toes[x][y];
       // Add style based on player
-      column.className = tics_and_toes[x][y];
+      if (tics_and_toes[x][y] != "?") {
+        column.className = "col s2 " + tics_and_toes[x][y];
+      }
+      else {
+        column.className = "col s2";
+      }
+      // Add coordinates to elements
+      column.dataset.x = x;
+      column.dataset.y = y;
       // Add column to row
       row.appendChild(column);
     }
@@ -126,9 +135,11 @@ function click_event() {
     return;
   }
   // Get cell coordinates from the object
-  let x = this.cellIndex;
-  let y = this.parentNode.rowIndex;
-  if (tics_and_toes[x][y] === "") {
+  // let x = this.cellIndex;
+  // let y = this.parentNode.rowIndex;
+  let x = Number(this.dataset.x);
+  let y = Number(this.dataset.y);
+  if (tics_and_toes[x][y] === "?") {
     // Update cell if there is no marking allredy
     tics_and_toes[x][y] = turn;
     change_player_turn();
