@@ -101,7 +101,7 @@ function render_table(tics_and_toes) {
   for (let y = 0; y < y_size; y++) {
     // Create rows
     let row = document.createElement("div");
-    row.className = "row no-margin";
+    row.className = "row valign-wrapper";
     for (let x = 0; x < x_size; x++) {
       // Create columns for rows
       let column = document.createElement("div");
@@ -240,7 +240,7 @@ function check_winner(is_winner, mark) {
     player_turn = document.getElementById("player_turn");
     player_turn.innerHTML = ""
     // Stop automatic timer
-    clearInterval(update_timer);
+    clearInterval(timer_handle);
   }
 }
 

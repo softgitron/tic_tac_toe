@@ -9,28 +9,36 @@ div {
 }
 
 div.x {
-    background-color: rgb(124, 252, 0);
+    color:  rgb(147, 255, 38);
 }
 
 div.o {
-    background-color: rgb(250, 128, 114);
+    color: rgb(253, 151, 139);
 }
 
 div.no-margin {
     margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
 }
 
 .timer-base {
-    background-color: white;
     width: 100%;
-    height: 35px;
     position: relative;
 }
 
 .timer-bar {
     position: absolute;
-    height:35px;
     width: 100%;
     top: 0;
     left: 0;
+}
+
+.progress-custom {
+    height: 40px;
+    background-color: lightgray"
+}
+
+h4.player_turn {
+    margin-top: 1.2rem;
 }
