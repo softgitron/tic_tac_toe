@@ -136,7 +136,7 @@ function click_event() {
   // Calculate straight count
   // This gotta be done before updates otherwise
   // function will check wrong position
-  results = check_status(tics_and_toes, x, y);
+  let is_winner = check_status(tics_and_toes, x, y);
   let mark = tics_and_toes[x][y];
   // Update table incase there is need for new space
   if (expanding === true) {
@@ -145,7 +145,7 @@ function click_event() {
   // Render new table
   render_table(tics_and_toes);
   // Check wether either player won the game
-  check_winner(results, mark)
+  check_winner(is_winner, mark)
 }
 
 function change_player_turn() {
@@ -171,14 +171,16 @@ function check_status(tics_and_toes, x, y) {
   // Define variables
   let first;
   let second;
-  let results = new Array(4);
   // Check left and right, up and down and diagonal directions based on check table
   for (check = 0; check < check_table.length; check++) {
     let first = check_lines(tics_and_toes, x, y, check_table[check][0], check_table[check][1]);
     let second = check_lines(tics_and_toes, x, y, -check_table[check][0], -check_table[check][1]);
-    results[check] = first + second - 1;
+    // If there is at least needed count return immidiately
+    if (first + second - 1 >= needed_count) {
+      return true;
+    }
   }
-  return results;
+  return false;
 }
 
 
@@ -207,9 +209,9 @@ function check_lines(tics_and_toes, start_x, start_y, direction_x, direction_y) 
   return count;
 }
 
-function check_winner(results, mark) {
+function check_winner(is_winner, mark) {
   // Check do we have a winner
-  if (results.includes(5)) {
+  if (is_winner === true) {
     if (mark === player_1_mark) {
       alert("Player 1 won!");
     } else {
