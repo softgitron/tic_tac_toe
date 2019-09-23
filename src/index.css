@@ -1,45 +1,44 @@
-table, th, td {
-    border: 1px solid black;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-  
-th, td {
-    min-height: 60px;
-    min-width: 60px;
-    height: 60px;
-    width: 60px;
+div {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 30px;
     /* Align text horizontally and vertically */
     text-align: center;
     vertical-align: middle;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
 }
 
-td.x {
-    background-color: rgb(124, 252, 0)
+div.x {
+    color:  rgb(147, 255, 38);
 }
 
-td.o {
-    background-color: rgb(250, 128, 114)
+div.o {
+    color: rgb(253, 151, 139);
+}
+
+div.no-margin {
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
 }
 
 .timer-base {
-    background-color: lightgray;
-    width: 320px;
-    height: 35px;
+    width: 100%;
     position: relative;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 30px;
-    /* Align text horizontally and vertically */
-    text-align: center;
-    vertical-align: middle;
 }
 
 .timer-bar {
     position: absolute;
-    height:35px;
     width: 100%;
     top: 0;
     left: 0;
+}
+
+.progress-custom {
+    height: 40px;
+    background-color: lightgray"
+}
+
+h4.player_turn {
+    margin-top: 1.2rem;
 }
